@@ -1,11 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float speed = 6f;
     [SerializeField] private float jumpForce = 3f;
+    [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     private Vector2 movement;
@@ -21,7 +23,7 @@ public class Movement : MonoBehaviour
     void Update()
     {
         // Player moves with "A"/"D" or "left"/"right"
-        input = Input.GetAxis("Horizontal");
+        input = Input.GetAxisRaw("Horizontal");
         movement.x = input * speed * Time.deltaTime;
 
         transform.Translate(movement);
@@ -29,6 +31,14 @@ public class Movement : MonoBehaviour
         if (Input.GetButtonDown("Jump") && GetIsGrounded())
         {
             Jump();
+        }
+
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + (fallMultiplier - 1) * Physics2D.gravity.y * Time.deltaTime);
+        } else if (Input.GetButtonUp("Jump") && !GetIsGrounded() && rb.linearVelocity.y > 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .5f);
         }
     }
 
