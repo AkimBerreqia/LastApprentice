@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,7 +25,7 @@ public class Movement : MonoBehaviour
     void Update()
     {
         // Player moves with "A"/"D" or "left"/"right"
-        input = Input.GetAxisRaw("Horizontal");
+        input = Input.GetAxis("Horizontal");
         movement.x = input * speed * Time.deltaTime;
 
         transform.Translate(movement);
@@ -38,7 +40,7 @@ public class Movement : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + (fallMultiplier - 1) * Physics2D.gravity.y * Time.deltaTime);
         } else if (Input.GetButtonUp("Jump") && !GetIsGrounded() && rb.linearVelocity.y > 0)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .5f);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .1f);
         }
     }
 
@@ -46,7 +48,7 @@ public class Movement : MonoBehaviour
     {
         // "Vector2(-input, 0)" is used to help player jumping, even if he has passed a bit of the platform (he has more time to jump)
         // "playerHalfHeight * 1.5f" scales the range of the Raycast if the player scale changes
-        return Physics2D.Raycast(transform.position, Vector2.down + new Vector2(-input, 0), playerHalfHeight * 1.5f, LayerMask.GetMask("Ground"));
+        return Physics2D.Raycast(transform.position, Vector2.down + new Vector2(-input, 0), playerHalfHeight * 2f, LayerMask.GetMask("Ground"));
     }
 
     private void Jump()
