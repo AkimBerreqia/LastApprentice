@@ -5,17 +5,20 @@ public class Movement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float speed = 6f;
     [SerializeField] private float jumpForce = 3f;
+    [SerializeField] private float wallJumpForce = 3f;
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     private Vector2 movement;
     private float runInput;
     private float climbInput;
-    private float wallGrabDirection;
     private float playerHalfHeight;
 
     private RaycastHit2D isDiagonallyGrounded;
     private RaycastHit2D isDownGrounded;
+
+    private bool grabLeft;
+    private bool grabRight;
 
     private void Start()
     {
@@ -25,12 +28,6 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Check the wall grab direction, to know on which side the player is able to climb
-        if (runInput != 0)
-        {
-            wallGrabDirection = runInput;
-        }
-
         if (Input.GetButtonDown("Jump"))
         {
             if (GetIsGrounded())
@@ -45,8 +42,9 @@ public class Movement : MonoBehaviour
         if (Input.GetButton("Climb") && GetCanClimb())
         {
             Climb();
-        } else
+        } else if (Input.GetButtonUp("Climb") || !GetCanClimb())
         {
+            rb.gravityScale = 1f;
             Run();
         }
 
@@ -70,6 +68,7 @@ public class Movement : MonoBehaviour
     private void Climb()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0f);
+        rb.gravityScale = 0f;
 
         // Player moves with "W"/"S" or "up"/"down"
         climbInput = Input.GetAxis("Vertical");
@@ -86,7 +85,15 @@ public class Movement : MonoBehaviour
 
     private void WallJump()
     {
-        movement.x = wallGrabDirection * speed * Time.deltaTime;
+        if (GetCanLeftClimb())
+        {
+            movement.x = wallJumpForce * speed * Time.deltaTime;
+        } else if (GetCanRightClimb())
+        {
+            movement.x = - wallJumpForce * speed * Time.deltaTime;
+        }
+
+        transform.Translate(movement);
         Jump();
     }
 
@@ -104,6 +111,19 @@ public class Movement : MonoBehaviour
 
     private bool GetCanClimb()
     {
-        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, new Vector2(wallGrabDirection, 0), playerHalfHeight * .75f, LayerMask.GetMask("Ground"));
+        grabLeft = GetCanLeftClimb();
+        grabRight = GetCanRightClimb();
+
+        return grabLeft || grabRight;
+    }
+
+    private bool GetCanLeftClimb()
+    {
+        return Physics2D.Raycast(transform.position, Vector2.left, playerHalfHeight * 1.25f, LayerMask.GetMask("Ground"));
+    }
+
+    private bool GetCanRightClimb()
+    {
+        return Physics2D.Raycast(transform.position, Vector2.right, playerHalfHeight * 1.25f, LayerMask.GetMask("Ground"));
     }
 }
