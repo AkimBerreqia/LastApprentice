@@ -45,7 +45,7 @@ public class Movement : MonoBehaviour
             if (GetIsGrounded() && !isClimbing)
             {
                 Jump();
-            } else if (GetCanClimb())
+            } else if (GetCanClimb() && isClimbing)
             {
                 StopClimb();
                 WallJump();
@@ -56,25 +56,30 @@ public class Movement : MonoBehaviour
         {
             rb.gravityScale = 0f;
             isClimbing = true;
-            if (grabLeft)
+            
+            // Checks if the player is touching the wall or not
+            if (grabLeft && GetLeftWallDistance() >= 0.01f)
             {
-
+                // Move left while the player is not touching the wall
+                transform.Translate(new Vector2(- speed * Time.deltaTime, 0));
+            } else if (grabRight && GetRightWallDistance() >= 0.01f)
+            {
+                // Move right while the player is not touching the wall
+                transform.Translate(new Vector2(speed * Time.deltaTime, 0));
+            } else
+            {
+                Climb();
             }
-
-            Climb();
-        } else if (Input.GetButtonUp("Climb") || !GetCanClimb())
+        } else if ((Input.GetButtonUp("Climb") || !GetCanClimb()) && isClimbing)
         {
-            if (isClimbing)
-            {
-                StopClimb();
-            }
-
+            StopClimb();
+        } else
+        {
             Run();
         }
 
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
         {
-            isJumping = false;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .1f);
         } else if (rb.linearVelocity.y <= 0)
         {
@@ -122,9 +127,12 @@ public class Movement : MonoBehaviour
     {
         if (GetCanLeftClimb())
         {
+            rb.AddForce(Vector2.right, ForceMode2D.Impulse);
             movement.x = wallJumpForce * speed * Time.deltaTime;
-        } else if (GetCanRightClimb())
+        }
+        else if (GetCanRightClimb())
         {
+            rb.AddForce(Vector2.left, ForceMode2D.Impulse);
             movement.x = - wallJumpForce * speed * Time.deltaTime;
         }
 
@@ -154,21 +162,23 @@ public class Movement : MonoBehaviour
 
     private bool GetCanLeftClimb()
     {
-        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.left, playerHalfHeight * .25f, LayerMask.GetMask("Ground"));
+        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.left, playerHalfHeight * .5f, LayerMask.GetMask("Ground"));
     }
 
     private float GetLeftWallDistance()
     {
-        return 0;
+        float leftWallDistance = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.left, playerHalfHeight * .5f, LayerMask.GetMask("Ground")).distance;
+        return leftWallDistance;
     }
 
     private bool GetCanRightClimb()
     {
-        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.right, playerHalfHeight * .25f, LayerMask.GetMask("Ground"));
+        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.right, playerHalfHeight * .5f, LayerMask.GetMask("Ground"));
     }
 
     private float GetRightWallDistance()
     {
-        return 0;
+        float rightWallDistance = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.right, playerHalfHeight * .5f, LayerMask.GetMask("Ground")).distance;
+        return rightWallDistance;
     }
 }
