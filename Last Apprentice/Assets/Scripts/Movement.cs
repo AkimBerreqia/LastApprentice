@@ -17,11 +17,6 @@ public class Movement : MonoBehaviour
     [SerializeField] private float jumpForce = 3f;
     [SerializeField] private float wallJumpForce = 3f;
 
-    [SerializeField] private RaycastHit2D isDiagonallyGrounded;
-    [SerializeField] private RaycastHit2D isDownGrounded;
-
-    [SerializeField] private bool grabLeft;
-    [SerializeField] private bool grabRight;
     [SerializeField] private bool isClimbing;
     [SerializeField] private bool isJumping;
 
@@ -54,15 +49,15 @@ public class Movement : MonoBehaviour
 
         if (Input.GetButton("Climb") && GetCanClimb() && !isJumping)
         {
-            rb.gravityScale = 0f;
+            rb.gravityScale = 1f;
             isClimbing = true;
             
             // Checks if the player is touching the wall or not
-            if (grabLeft && GetLeftWallDistance() >= 0.01f)
+            if (GetCanLeftClimb() && GetCanLeftClimb().distance >= 0.01f)
             {
                 // Move left while the player is not touching the wall
                 transform.Translate(new Vector2(- speed * Time.deltaTime, 0));
-            } else if (grabRight && GetRightWallDistance() >= 0.01f)
+            } else if (GetCanRightClimb() && GetCanRightClimb().distance >= 0.01f)
             {
                 // Move right while the player is not touching the wall
                 transform.Translate(new Vector2(speed * Time.deltaTime, 0));
@@ -98,11 +93,19 @@ public class Movement : MonoBehaviour
     }
     private void Climb()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0f);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0f, rb.linearVelocity.y * 0f);
 
         // Player moves with "W"/"S" or "up"/"down"
         climbInput = Input.GetAxis("Vertical");
-        movement = new Vector2(0, climbInput * speed * Time.deltaTime);
+
+        // Climb up slower than climb down
+        if (climbInput > 0)
+        {
+            movement = new Vector2(0, .5f * climbInput * speed * Time.deltaTime);
+        } else
+        {
+            movement = new Vector2(0, climbInput * speed * Time.deltaTime);
+        }
 
         transform.Translate(movement);
     }
@@ -142,43 +145,34 @@ public class Movement : MonoBehaviour
 
     private bool GetIsGrounded()
     {
+        return GetIsDownGrounded() || GetIsDiagonallyGrounded();
+    }
+
+    private RaycastHit2D GetIsDownGrounded()
+    {
         // Checks if there is a platform under the player only
-        isDownGrounded = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.down, playerHalfHeight * .75f, LayerMask.GetMask("Ground"));
-        
+        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.down, playerHalfHeight * .75f, LayerMask.GetMask("Ground"));
+    }
+
+    private RaycastHit2D GetIsDiagonallyGrounded()
+    {
         // "Vector2(-runInput, 0)" is used to help player jumping, even if he has passed a bit of the platform (he has more time to jump)
         // "playerHalfHeight * 1.5f" scales the range of the Raycast if the player scale changes
-        isDiagonallyGrounded = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.down + new Vector2(-runInput, 0), playerHalfHeight * .75f, LayerMask.GetMask("Ground"));
-
-        return (isDownGrounded || isDiagonallyGrounded);
+        return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.down + new Vector2(-runInput, 0), playerHalfHeight * .75f, LayerMask.GetMask("Ground"));
     }
 
     private bool GetCanClimb()
     {
-        grabLeft = GetCanLeftClimb();
-        grabRight = GetCanRightClimb();
-
-        return grabLeft || grabRight;
+        return GetCanLeftClimb() || GetCanRightClimb();
     }
 
-    private bool GetCanLeftClimb()
+    private RaycastHit2D GetCanLeftClimb()
     {
         return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.left, playerHalfHeight * .5f, LayerMask.GetMask("Ground"));
     }
 
-    private float GetLeftWallDistance()
-    {
-        float leftWallDistance = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.left, playerHalfHeight * .5f, LayerMask.GetMask("Ground")).distance;
-        return leftWallDistance;
-    }
-
-    private bool GetCanRightClimb()
+    private RaycastHit2D GetCanRightClimb()
     {
         return Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.right, playerHalfHeight * .5f, LayerMask.GetMask("Ground"));
-    }
-
-    private float GetRightWallDistance()
-    {
-        float rightWallDistance = Physics2D.BoxCast(transform.position, spriteRenderer.bounds.size, 0, Vector2.right, playerHalfHeight * .5f, LayerMask.GetMask("Ground")).distance;
-        return rightWallDistance;
     }
 }
