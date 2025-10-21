@@ -37,6 +37,7 @@ public class Movement : MonoBehaviour
         Debug.Log("GetCanClimb() : " + GetCanClimb());
         Debug.Log("Gravity scale : " + rb.gravityScale);
         Debug.Log("rb.linearVelocity.y : " + rb.linearVelocity.y);
+        Debug.Log("GetIsGrounded().distance : " + GetIsDownGrounded().distance);
 
         if (Input.GetButtonDown("Jump") && canJump)
         {
@@ -85,6 +86,9 @@ public class Movement : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .1f);
+        } else if (rb.linearVelocityY <= -14f)
+        {
+            rb.linearVelocityY = -14f;
         } else if (rb.linearVelocity.y <= 0 && !isClimbing)
         {
             isJumping = false;
