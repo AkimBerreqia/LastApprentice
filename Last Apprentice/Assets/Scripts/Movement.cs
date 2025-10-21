@@ -18,13 +18,17 @@ public class Movement : MonoBehaviour
     [SerializeField] private float wallJumpForce = 3f;
 
     [SerializeField] private bool isClimbing;
+    [SerializeField] private bool startGrabbingWall;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool canJump;
 
     private void Start()
     {
         playerHalfHeight = spriteRenderer.bounds.extents.y;
         isClimbing = false;
+        startGrabbingWall = false;
         isJumping = false;
+        canJump = true;
     }
 
     // Update is called once per frame
@@ -32,8 +36,9 @@ public class Movement : MonoBehaviour
     {
         Debug.Log("GetCanClimb() : " + GetCanClimb());
         Debug.Log("Gravity scale : " + rb.gravityScale);
+        Debug.Log("rb.linearVelocity.y : " + rb.linearVelocity.y);
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && canJump)
         {
             isJumping = true;
 
@@ -49,8 +54,12 @@ public class Movement : MonoBehaviour
 
         if (Input.GetButton("Climb") && GetCanClimb() && !isJumping)
         {
-            rb.gravityScale = 1f;
-            isClimbing = true;
+            if (!isClimbing)
+            {
+                startGrabbingWall = true;
+                isClimbing = true;
+                rb.gravityScale = 0f;
+            }
             
             // Checks if the player is touching the wall or not
             if (GetCanLeftClimb() && GetCanLeftClimb().distance >= 0.01f)
@@ -76,7 +85,7 @@ public class Movement : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .1f);
-        } else if (rb.linearVelocity.y <= 0)
+        } else if (rb.linearVelocity.y <= 0 && !isClimbing)
         {
             isJumping = false;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + (fallMultiplier - 1) * Physics2D.gravity.y * Time.deltaTime);
@@ -93,21 +102,31 @@ public class Movement : MonoBehaviour
     }
     private void Climb()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0f, rb.linearVelocity.y * 0f);
-
-        // Player moves with "W"/"S" or "up"/"down"
-        climbInput = Input.GetAxis("Vertical");
-
-        // Climb up slower than climb down
-        if (climbInput > 0)
+        if (rb.linearVelocity.y < 0 && startGrabbingWall)
         {
-            movement = new Vector2(0, .5f * climbInput * speed * Time.deltaTime);
+            canJump = false;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y - fallMultiplier * Physics2D.gravity.y * Time.deltaTime);
+        } else if (rb.linearVelocity.y >= 0 && startGrabbingWall)
+        {
+            canJump = true;
+            startGrabbingWall = false;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0f, rb.linearVelocity.y * 0f);
         } else
         {
-            movement = new Vector2(0, climbInput * speed * Time.deltaTime);
-        }
+            // Player moves with "W"/"S" or "up"/"down", only if doesn't slip
+            climbInput = Input.GetAxis("Vertical");
 
-        transform.Translate(movement);
+            // Climb up slower than climb down
+            if (climbInput > 0)
+            {
+                movement = new Vector2(0, .5f * climbInput * speed * Time.deltaTime);
+            } else
+            {
+                movement = new Vector2(0, climbInput * speed * Time.deltaTime);
+            }
+
+            transform.Translate(movement);
+        }
     }
 
     private void StopClimb()
@@ -115,6 +134,7 @@ public class Movement : MonoBehaviour
         rb.gravityScale = 1f;
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0f);
         isClimbing = false;
+        canJump = true;
 
         movement.y = 0f;
         transform.Translate(movement);
