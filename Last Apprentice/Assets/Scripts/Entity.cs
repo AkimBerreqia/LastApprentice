@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Entity : Interactable
 {
+    // Reprensent an PNJ or an enemy
+
     public string Name;
     private string[] Messages;
     protected Entity(string Name, string[] Messages)
@@ -18,11 +20,6 @@ public class Entity : Interactable
 
     // Update is called once per frame
     void Update()
-    {
-        
-    }
-
-    protected void InteractWith()
     {
         
     }

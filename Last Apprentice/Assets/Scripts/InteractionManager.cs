@@ -1,26 +1,13 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class InteractionManager : MonoBehaviour
+public interface InteractionManager
 {
-    protected InteractionManager()
+    public void InteractWith(GameObject interactable)
     {
-
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    protected void InteractWith(Interactable interactable)
-    {
-        Debug.Log(interactable.GetType());
+        if (interactable.CompareTag("PNJ"))
+        {
+            interactable.GetComponent<PNJ>().InteractWith();
+        }
     }
 }

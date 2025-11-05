@@ -1,8 +1,12 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerInteraction : InteractionManager
+public class PlayerInteraction : MonoBehaviour, InteractionManager
 {
-    public PlayerInteraction() : base()
+    private InteractionManager interactionManager;
+    private GameObject interactable;
+
+    public PlayerInteraction()
     {
 
     }
@@ -16,6 +20,12 @@ public class PlayerInteraction : InteractionManager
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        interactable = collision.gameObject;
+        interactionManager.InteractWith(interactable);
     }
 }

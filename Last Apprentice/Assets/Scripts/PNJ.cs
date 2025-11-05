@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PNJ : Entity
+public class PNJ : Entity, InteractionManager
 {
     public PNJ(string Name, string[] Messages) : base(Name, Messages)
     {
@@ -19,10 +19,10 @@ public class PNJ : Entity
         
     }
 
-    protected new void InteractWith()
+    public void InteractWith()
     {
         Speak();
-    }
+    } 
 
     private void Speak()
     {
