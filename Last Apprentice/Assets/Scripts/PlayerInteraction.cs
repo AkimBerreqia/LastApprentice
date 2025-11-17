@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour, InteractionManager
 {
-    private InteractionManager interactionManager;
-    private GameObject interactable;
+    [SerializeField] private InteractionManager interactionManager;
+    [SerializeField] private Collider2D playerCollider;
 
     public PlayerInteraction()
     {
@@ -25,7 +25,14 @@ public class PlayerInteraction : MonoBehaviour, InteractionManager
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        interactable = collision.gameObject;
-        interactionManager.InteractWith(interactable);
+        InteractWith(collision);
+    }
+
+    public void InteractWith(Collider2D interactableCollider)
+    {
+        if (interactableCollider.gameObject.CompareTag("PNJ"))
+        {
+            interactableCollider.GetComponent<NPC>().InteractWith(playerCollider);
+        }
     }
 }

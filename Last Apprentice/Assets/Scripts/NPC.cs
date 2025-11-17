@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class PNJ : Entity, InteractionManager
+public class NPC : Entity, InteractionManager
 {
-    public PNJ(string Name, string[] Messages) : base(Name, Messages)
+    public NPC(string Name, string[] Messages) : base(Name, Messages)
     {
 
     }
@@ -19,12 +19,15 @@ public class PNJ : Entity, InteractionManager
         
     }
 
-    public void InteractWith()
+    public void InteractWith(Collider2D interactableCollider)
     {
-        Speak();
+        if (interactableCollider.CompareTag("Player"))
+        {
+            Speak();
+        }
     } 
 
-    private void Speak()
+    public void Speak()
     {
         Debug.Log("hey! I'm speaking... \n- " + Name);
     }

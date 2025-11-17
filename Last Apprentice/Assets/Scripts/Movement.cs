@@ -34,10 +34,10 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("GetCanClimb() : " + GetCanClimb());
-        Debug.Log("Gravity scale : " + rb.gravityScale);
-        Debug.Log("rb.linearVelocity.y : " + rb.linearVelocity.y);
-        Debug.Log("GetIsGrounded().distance : " + GetIsDownGrounded().distance);
+        //Debug.Log("GetCanClimb() : " + GetCanClimb());
+        //Debug.Log("Gravity scale : " + rb.gravityScale);
+        //Debug.Log("rb.linearVelocity.y : " + rb.linearVelocity.y);
+        //Debug.Log("GetIsGrounded().distance : " + GetIsDownGrounded().distance);
 
         if (Input.GetButtonDown("Jump") && canJump)
         {
