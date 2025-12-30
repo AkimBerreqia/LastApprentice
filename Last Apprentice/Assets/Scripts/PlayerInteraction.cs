@@ -1,38 +1,25 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerInteraction : MonoBehaviour, InteractionManager
+public class PlayerInteraction : MonoBehaviour
 {
-    [SerializeField] private InteractionManager interactionManager;
-    [SerializeField] private Collider2D playerCollider;
+    [SerializeField] private IInteractable interactable;
 
-    public PlayerInteraction()
+    public void TryToInteractWith()
     {
-
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        InteractWith(collision);
-    }
-
-    public void InteractWith(Collider2D interactableCollider)
-    {
-        if (interactableCollider.gameObject.CompareTag("PNJ"))
+        if (interactable != null)
         {
-            interactableCollider.GetComponent<NPC>().InteractWith(playerCollider);
+            interactable.InteractWith();
         }
+    }
+
+    public void SetInteractable(IInteractable instance)
+    {
+        interactable = instance;
+    }
+
+    public void ClearInteractable()
+    {
+        interactable = null;
     }
 }

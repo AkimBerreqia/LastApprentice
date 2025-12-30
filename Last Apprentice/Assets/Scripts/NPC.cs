@@ -1,7 +1,9 @@
 using UnityEngine;
 
-public class NPC : Entity, InteractionManager
+public class NPC : Entity, IInteractable
 {
+    [SerializeField] private PlayerInteraction player;
+
     public NPC(string Name, string[] Messages) : base(Name, Messages)
     {
 
@@ -19,14 +21,63 @@ public class NPC : Entity, InteractionManager
         
     }
 
-    public void InteractWith(Collider2D interactableCollider)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (interactableCollider.CompareTag("Player"))
+        if (collision.CompareTag("Player"))
         {
-            Speak();
+            ShowPopUp();
         }
-    } 
+    }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            player = collision.GetComponent<PlayerInteraction>();
+            player.SetInteractable(this);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            player = collision.GetComponent<PlayerInteraction>();
+            player.ClearInteractable();
+            HidePopUp();
+        }
+    }
+    
+    public void InteractWith()
+    {
+
+    }
+
+    public void InteractWithWhenEntering()
+    {
+        ShowPopUp();
+    }
+
+    public void InteractWithWhenStaying()
+    {
+        //if input down for interaction, then speak !
+    }
+
+    public void InteractWithWhenLeaving()
+    {
+        HidePopUp();
+    }
+
+    private void ShowPopUp()
+    {
+
+    }
+
+    private void HidePopUp()
+    {
+
+    }
+    
     public void Speak()
     {
         Debug.Log("hey! I'm speaking... \n- " + Name);

@@ -1353,17 +1353,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   rb: {fileID: 1203145307}
   spriteRenderer: {fileID: 1203145309}
-  speed: 6
+  speed: 10
+  maxLinearVelocityY: -14
   playerHalfHeight: 0
   movement: {x: 0, y: 0}
   runInput: 0
   climbInput: 0
   fallMultiplier: 2.5
-  jumpForce: 6
-  wallJumpForce: 3
+  jumpForce: 8
+  wallJumpForce: 6
   isClimbing: 0
   startGrabbingWall: 0
   isJumping: 0
+  isWallJumping: 0
+  isWallJumpingRight: 0
+  isWallJumpingLeft: 0
   canJump: 0
 --- !u!114 &1203145312
 MonoBehaviour:
@@ -1377,7 +1381,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30c49d183f77f33408d6b244249f67cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
-  playerCollider: {fileID: 1203145308}
 --- !u!1 &1465478539
 GameObject:
   m_ObjectHideFlags: 0
@@ -1391,8 +1394,8 @@ GameObject:
   - component: {fileID: 1465478542}
   - component: {fileID: 1465478543}
   m_Layer: 0
-  m_Name: PNJ
-  m_TagString: PNJ
+  m_Name: NPC
+  m_TagString: NPC
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1483,6 +1486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PNJ
   Name: Old Man
+  player: {fileID: 0}
 --- !u!61 &1465478543
 BoxCollider2D:
   m_ObjectHideFlags: 0

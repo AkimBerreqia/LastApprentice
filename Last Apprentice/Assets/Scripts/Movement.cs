@@ -5,7 +5,8 @@ public class Movement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
-    [SerializeField] private float speed = 6f;
+    [SerializeField] private float speed = 10f;
+    [SerializeField] private float maxLinearVelocityY = -14f;
 
     [SerializeField] private float playerHalfHeight;
     
@@ -14,12 +15,15 @@ public class Movement : MonoBehaviour
     [SerializeField] private float climbInput;
     
     [SerializeField] private float fallMultiplier = 2.5f;
-    [SerializeField] private float jumpForce = 3f;
-    [SerializeField] private float wallJumpForce = 3f;
+    [SerializeField] private float jumpForce = 6f;
+    [SerializeField] private float wallJumpForce = 8f;
 
     [SerializeField] private bool isClimbing;
     [SerializeField] private bool startGrabbingWall;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool isWallJumping;
+    [SerializeField] private bool isWallJumpingRight;
+    [SerializeField] private bool isWallJumpingLeft;
     [SerializeField] private bool canJump;
 
     private void Start()
@@ -28,6 +32,9 @@ public class Movement : MonoBehaviour
         isClimbing = false;
         startGrabbingWall = false;
         isJumping = false;
+        isWallJumping = false;
+        isWallJumpingRight = false;
+        isWallJumpingLeft = false;
         canJump = true;
     }
 
@@ -45,7 +52,7 @@ public class Movement : MonoBehaviour
 
             if (GetIsGrounded() && !isClimbing)
             {
-                Jump();
+                Jump(jumpForce);
             } else if (GetCanClimb() && isClimbing)
             {
                 StopClimb();
@@ -59,6 +66,7 @@ public class Movement : MonoBehaviour
             {
                 startGrabbingWall = true;
                 isClimbing = true;
+                runInput = 0;
                 rb.gravityScale = 0f;
             }
             
@@ -86,12 +94,16 @@ public class Movement : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * .1f);
-        } else if (rb.linearVelocityY <= -14f)
+        } else if (rb.linearVelocityY <= maxLinearVelocityY)
         {
-            rb.linearVelocityY = -14f;
+            rb.linearVelocityY = maxLinearVelocityY;
         } else if (rb.linearVelocity.y <= 0 && !isClimbing)
         {
             isJumping = false;
+            isWallJumping = false;
+            isWallJumpingLeft = false;
+            isWallJumpingRight = false;
+
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + (fallMultiplier - 1) * Physics2D.gravity.y * Time.deltaTime);
         }
     }
@@ -100,7 +112,17 @@ public class Movement : MonoBehaviour
     {
         // Player moves with "A"/"D" or "left"/"right"
         runInput = Input.GetAxis("Horizontal");
-        movement.x = runInput * speed * Time.deltaTime;
+
+        // When wall jumping, the player can only run if it is in the same direction
+        // as the wall jump direction
+        if (!isWallJumping)
+        {
+            movement.x = runInput * speed * Time.deltaTime;
+        } else if (isJumping || (isWallJumpingRight && runInput > 0) || (isWallJumpingLeft && runInput < 0))
+        {
+            movement.x = runInput * jumpForce * Time.deltaTime;
+
+        }
 
         transform.Translate(movement);
     }
@@ -144,27 +166,31 @@ public class Movement : MonoBehaviour
         transform.Translate(movement);
     }
 
-    private void Jump()
+    private void Jump(float force)
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0f);
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
     }
 
     private void WallJump()
     {
+        isWallJumping = true;
+
         if (GetCanLeftClimb())
         {
-            rb.AddForce(Vector2.right, ForceMode2D.Impulse);
-            movement.x = wallJumpForce * speed * Time.deltaTime;
+            isWallJumpingRight = true;
+            rb.AddForce(Vector2.right * speed, ForceMode2D.Impulse);
+            //movement.x = wallJumpForce * speed * Time.deltaTime;
         }
         else if (GetCanRightClimb())
         {
-            rb.AddForce(Vector2.left, ForceMode2D.Impulse);
-            movement.x = - wallJumpForce * speed * Time.deltaTime;
+            isWallJumpingLeft = true;
+            rb.AddForce(Vector2.left * speed, ForceMode2D.Impulse);
+            //movement.x = - wallJumpForce * speed * Time.deltaTime;
         }
 
-        transform.Translate(movement);
-        Jump();
+        //transform.Translate(movement);
+        Jump(wallJumpForce);
     }
 
     private bool GetIsGrounded()
