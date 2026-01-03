@@ -7,8 +7,12 @@ Hollow Knight Silksong has just released a few weeks ago and I have just seen De
 
 ## Series
 [Demon Slayer: Kimetsu no Yaiba](https://en.wikipedia.org/wiki/Demon_Slayer:_Kimetsu_no_Yaiba)
+
 [Frieren](https://en.wikipedia.org/wiki/Frieren)
+
+[Mushoku Tensei : Jobless Reincarnation](https://en.wikipedia.org/wiki/Mushoku_Tensei)
 
 ## Video games
 [Hollow Knight](https://en.wikipedia.org/wiki/Hollow_Knight)
+
 [Hollow Knight: Silksong](https://en.wikipedia.org/wiki/Hollow_Knight:_Silksong)
